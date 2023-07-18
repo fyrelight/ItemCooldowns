@@ -1,0 +1,14 @@
+# Must be a valid Material name
+# https://jd.papermc.io/paper/1.20/org/bukkit/Material.html
+# Triggers cooldown when item is consumed by player
+consumables:
+  golden_apple: 30
+  enchanted_golden_apple: 120
+
+# Must be a valid Entity Type name
+# https://jd.papermc.io/paper/1.20/org/bukkit/entity/EntityType.html
+# Triggers cooldown when projectile is launched by player
+projectiles:
+  ender_pearl:
+    cooldown: 15
+    material: ender_pearl

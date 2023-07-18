@@ -1,0 +1,11 @@
+name: ItemCooldowns
+version: 1.0
+main: uk.fyrelight.itemcooldowns.ItemCooldownsPlugin
+author: lexiccn
+api-version: 1.20
+commands:
+  itemcooldowns:
+    description: Commands for the ItemCooldowns plugin
+    usage: /itemcooldowns <reload>
+    aliases: [icds]
+
