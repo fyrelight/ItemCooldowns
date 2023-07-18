@@ -22,11 +22,13 @@ import java.util.*;
 public class CooldownsListener implements Listener {
     private final ItemCooldownsPlugin plugin;
     private final Map<Material, Integer> consumableCooldowns = new HashMap<>();
+    private final Map<Material, List<Material>> consumableMaterials = new HashMap<>();
     private final Map<EntityType, Integer> projectileCooldowns = new HashMap<>();
     private final Map<EntityType, List<Material>> projectileMaterials = new HashMap<>();
 
     public void reloadListener() {
         consumableCooldowns.clear();
+        consumableMaterials.clear();
         projectileCooldowns.clear();
         projectileMaterials.clear();
         registerConsumables();
@@ -38,18 +40,29 @@ public class CooldownsListener implements Listener {
         if (section == null) {
             return;
         }
-        for (String matName : section.getKeys(false)) {
-            int seconds = section.getInt(matName);
+        for (String consumableName : section.getKeys(false)) {
+            int seconds = section.getInt(consumableName);
             if (seconds <= 0) {
-                plugin.getLogger().warning("Invalid cooldown for consumable: " + matName);
+                plugin.getLogger().warning("Invalid cooldown for consumable: " + consumableName);
                 continue;
             }
-            Material material = Material.getMaterial(matName.toUpperCase(Locale.ROOT));
-            if (material == null) {
-                plugin.getLogger().warning("Invalid material for consumable: " + matName);
+            Material consumable = Material.getMaterial(consumableName.toUpperCase(Locale.ROOT));
+            if (consumable == null) {
+                plugin.getLogger().warning("Invalid material for consumable: " + consumableName);
                 continue;
             }
-            consumableCooldowns.put(material, seconds);
+            List<String> matNames = section.getStringList(consumableName+".materials");
+            List<Material> materials = new ArrayList<>();
+            for (String matName : matNames) {
+                Material material = Material.getMaterial(matName.toUpperCase(Locale.ROOT));
+                if (material == null) {
+                    plugin.getLogger().warning("Invalid material " + matName + " for consumable: " + consumableName);
+                    continue;
+                }
+                materials.add(material);
+            }
+            consumableMaterials.put(consumable, materials);
+            consumableCooldowns.put(consumable, seconds);
         }
     }
 
@@ -70,7 +83,7 @@ public class CooldownsListener implements Listener {
             for (String matName : matNames) {
                 Material material = Material.getMaterial(matName.toUpperCase(Locale.ROOT));
                 if (material == null) {
-                    plugin.getLogger().warning("Invalid material for projectile: " + entityName);
+                    plugin.getLogger().warning("Invalid material " + matName + " for projectile: " + entityName);
                     continue;
                 }
                 materials.add(material);
@@ -103,13 +116,15 @@ public class CooldownsListener implements Listener {
     @EventHandler(priority = EventPriority.MONITOR)
     public void onItemConsumed(PlayerItemConsumeEvent event) {
         Player player = event.getPlayer();
-        Material material = event.getItem().getType();
-        if (!consumableCooldowns.containsKey(material)) {
+        Material consumable = event.getItem().getType();
+        if (!consumableCooldowns.containsKey(consumable)) {
             return;
         }
-        int cooldown = consumableCooldowns.get(material) * 20;
-        player.setCooldown(material, 1);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> player.setCooldown(material, cooldown - 1), 1);
+        int cooldown = consumableCooldowns.get(consumable) * 20;
+        for (Material material : consumableMaterials.get(consumable)) {
+            player.setCooldown(material, 1);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> player.setCooldown(material, cooldown - 1), 1);
+        }
     }
 
     @EventHandler(priority = EventPriority.MONITOR)

@@ -2,8 +2,15 @@
 # https://jd.papermc.io/paper/1.20/org/bukkit/Material.html
 # Triggers cooldown when item is consumed by player
 consumables:
-  golden_apple: 30
-  enchanted_golden_apple: 120
+  golden_apple:
+    cooldown: 30
+    materials:
+    - golden_apple
+    - enchanted_golden_apple
+  enchanted_golden_apple:
+    cooldown: 120
+    materials:
+    - enchanted_golden_apple
 
 # Must be a valid Entity Type name
 # https://jd.papermc.io/paper/1.20/org/bukkit/entity/EntityType.html
