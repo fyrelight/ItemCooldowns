@@ -5,14 +5,17 @@ import uk.fyrelight.itemcooldowns.commands.ItemCooldownsCommand;
 import uk.fyrelight.itemcooldowns.listeners.CooldownsListener;
 
 public class ItemCooldownsPlugin extends JavaPlugin {
-    public void reloadPlugin() {
+    private CooldownsListener listener;
+    public boolean reloadPlugin() {
         this.reloadConfig();
-        this.getLogger().info("Reloaded config.");
+        listener.reloadListener();
+        return true;
     }
     @Override
     public void onEnable() {
         this.saveDefaultConfig();
         this.getCommand("itemcooldowns").setExecutor(new ItemCooldownsCommand(this));
-        getServer().getPluginManager().registerEvents(new CooldownsListener(this), this);
+        this.listener = new CooldownsListener(this);
+        getServer().getPluginManager().registerEvents(listener, this);
     }
 }

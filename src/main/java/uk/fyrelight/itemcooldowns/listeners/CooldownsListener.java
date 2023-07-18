@@ -23,6 +23,14 @@ public class CooldownsListener implements Listener {
     private final Map<Material, Integer> projectileCooldowns = new HashMap<>();
     private final Map<EntityType, Material> projectileMaterials = new HashMap<>();
 
+    public void reloadListener() {
+        consumableCooldowns.clear();
+        projectileCooldowns.clear();
+        projectileMaterials.clear();
+        registerConsumables();
+        registerProjectiles();
+    }
+
     public void registerConsumables() {
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("consumables");
         if (section == null) {

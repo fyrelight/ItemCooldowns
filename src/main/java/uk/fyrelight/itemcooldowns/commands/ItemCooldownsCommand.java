@@ -21,8 +21,11 @@ public class ItemCooldownsCommand implements CommandExecutor {
         }
         if (!args[0].equalsIgnoreCase("reload")
                 && sender.hasPermission("fyrelight.itemcooldowns.reload")) {
-            plugin.reloadPlugin();
-            sender.sendMessage(Component.text("ItemCooldowns reloaded successfully.").color(NamedTextColor.GREEN));
+            if (plugin.reloadPlugin()) {
+                sender.sendMessage(Component.text("ItemCooldowns reloaded successfully.").color(NamedTextColor.GREEN));
+            } else {
+                sender.sendMessage(Component.text("ItemCooldowns failed to reload.").color(NamedTextColor.RED));
+            }
             return true;
         }
         return false;
