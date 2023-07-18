@@ -17,15 +17,13 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import uk.fyrelight.itemcooldowns.ItemCooldownsPlugin;
 
-import java.util.HashMap;
-import java.util.Locale;
-import java.util.Map;
+import java.util.*;
 
 public class CooldownsListener implements Listener {
     private final ItemCooldownsPlugin plugin;
     private final Map<Material, Integer> consumableCooldowns = new HashMap<>();
     private final Map<EntityType, Integer> projectileCooldowns = new HashMap<>();
-    private final Map<EntityType, Material> projectileMaterials = new HashMap<>();
+    private final Map<EntityType, List<Material>> projectileMaterials = new HashMap<>();
 
     public void reloadListener() {
         consumableCooldowns.clear();
@@ -67,17 +65,17 @@ public class CooldownsListener implements Listener {
                 continue;
             }
             EntityType entityType = EntityType.valueOf(entityName.toUpperCase(Locale.ROOT));
-            String matName = section.getString(entityName+".material");
-            if (matName == null) {
-                plugin.getLogger().warning("Invalid material for projectile: " + entityName);
-                continue;
+            List<String> matNames = section.getStringList(entityName+".materials");
+            List<Material> materials = new ArrayList<>();
+            for (String matName : matNames) {
+                Material material = Material.getMaterial(matName.toUpperCase(Locale.ROOT));
+                if (material == null) {
+                    plugin.getLogger().warning("Invalid material for projectile: " + entityName);
+                    continue;
+                }
+                materials.add(material);
             }
-            Material material = Material.getMaterial(matName.toUpperCase(Locale.ROOT));
-            if (material == null) {
-                plugin.getLogger().warning("Invalid material for projectile: " + entityName);
-                continue;
-            }
-            projectileMaterials.put(entityType, material);
+            projectileMaterials.put(entityType, materials);
             projectileCooldowns.put(entityType, seconds);
         }
     }
@@ -123,9 +121,10 @@ public class CooldownsListener implements Listener {
         if (!projectileMaterials.containsKey(projectile.getType())) {
             return;
         }
-        Material material = projectileMaterials.get(projectile.getType());
         int cooldown = projectileCooldowns.get(projectile.getType()) * 20;
-        player.setCooldown(material, 1);
-        Bukkit.getScheduler().runTaskLater(plugin, () -> player.setCooldown(material, cooldown - 1), 1);
+        for (Material material : projectileMaterials.get(projectile.getType())) {
+            player.setCooldown(material, 1);
+            Bukkit.getScheduler().runTaskLater(plugin, () -> player.setCooldown(material, cooldown - 1), 1);
+        }
     }
 }

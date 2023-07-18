@@ -11,4 +11,5 @@ consumables:
 projectiles:
   ender_pearl:
     cooldown: 15
-    material: ender_pearl
+    materials:
+    - ender_pearl
