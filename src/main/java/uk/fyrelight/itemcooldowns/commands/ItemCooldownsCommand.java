@@ -16,7 +16,7 @@ public class ItemCooldownsCommand implements CommandExecutor {
 
     @Override
     public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String label, String[] args) {
-        if (args == null || args.length == 1) {
+        if (args == null || args.length == 0) {
             return false;
         }
         if (!args[0].equalsIgnoreCase("reload")
