@@ -8,4 +8,13 @@ commands:
     description: Commands for the ItemCooldowns plugin
     usage: /itemcooldowns <reload>
     aliases: [icds]
+permissions:
+    itemcooldowns.command:
+        description: Allows the user to use the /itemcooldowns command
+        default: false
+    itemcooldowns.command.reload:
+        description: Allows the user to reload the plugin
+        default: false
+        children:
+            itemcooldowns.command: true
 
