@@ -19,8 +19,11 @@ public class ItemCooldownsCommand implements CommandExecutor {
         if (args == null || args.length == 0) {
             return false;
         }
-        if (!args[0].equalsIgnoreCase("reload")
-                && sender.hasPermission("fyrelight.itemcooldowns.reload")) {
+        if (args[0].equalsIgnoreCase("reload")) {
+            if (!sender.hasPermission("fyrelight.itemcooldowns.reload")) {
+                sender.sendMessage(Component.text("You do not have permission to use this command.").color(NamedTextColor.RED));
+                return true;
+            }
             if (plugin.reloadPlugin()) {
                 sender.sendMessage(Component.text("ItemCooldowns reloaded successfully.").color(NamedTextColor.GREEN));
             } else {
