@@ -13,7 +13,7 @@ import java.util.Objects;
 
 public class ItemCooldownsPlugin extends JavaPlugin {
     private static ItemCooldownsPlugin instance;
-    private final File messagesFile = new File(getDataFolder(), "config.yml");
+    private final File messagesFile = new File(getDataFolder(), "messages.yml");
     private YamlConfiguration messages;
 
     public YamlConfiguration getMessages() {
