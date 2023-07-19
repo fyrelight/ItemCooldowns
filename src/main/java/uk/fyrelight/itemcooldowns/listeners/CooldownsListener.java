@@ -16,21 +16,18 @@ import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import uk.fyrelight.itemcooldowns.ItemCooldownsPlugin;
+import uk.fyrelight.itemcooldowns.objects.MaterialCooldown;
 
 import java.util.*;
 
 public class CooldownsListener implements Listener {
     private final ItemCooldownsPlugin plugin;
-    private final Map<Material, Integer> consumableCooldowns = new HashMap<>();
-    private final Map<Material, List<Material>> consumableMaterials = new HashMap<>();
-    private final Map<EntityType, Integer> projectileCooldowns = new HashMap<>();
-    private final Map<EntityType, List<Material>> projectileMaterials = new HashMap<>();
+    private final Map<Material, List<MaterialCooldown>> consumablesMap = new HashMap<>();
+    private final Map<EntityType, List<MaterialCooldown>> projectilesMap = new HashMap<>();
 
     public void reloadListener() {
-        consumableCooldowns.clear();
-        consumableMaterials.clear();
-        projectileCooldowns.clear();
-        projectileMaterials.clear();
+        consumablesMap.clear();
+        projectilesMap.clear();
         registerConsumables();
         registerProjectiles();
     }
@@ -38,31 +35,40 @@ public class CooldownsListener implements Listener {
     public void registerConsumables() {
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("consumables");
         if (section == null) {
+            plugin.getLogger().warning("Invalid configuration for consumables.");
             return;
         }
+
         for (String consumableName : section.getKeys(false)) {
-            int seconds = section.getInt(consumableName+".cooldown");
-            if (seconds <= 0) {
-                plugin.getLogger().warning("Invalid cooldown for consumable: " + consumableName);
-                continue;
-            }
             Material consumable = Material.getMaterial(consumableName.toUpperCase(Locale.ROOT));
             if (consumable == null) {
                 plugin.getLogger().warning("Invalid material for consumable: " + consumableName);
                 continue;
             }
-            List<String> matNames = section.getStringList(consumableName+".materials");
-            List<Material> materials = new ArrayList<>();
-            for (String matName : matNames) {
+
+            ConfigurationSection cooldownSection = section.getConfigurationSection(consumableName);
+            if (cooldownSection == null) {
+                plugin.getLogger().warning("Invalid configuration for consumable: " + consumableName);
+                continue;
+            }
+
+            List<MaterialCooldown> materials = new ArrayList<>();
+            for (String matName : cooldownSection.getKeys(false)) {
                 Material material = Material.getMaterial(matName.toUpperCase(Locale.ROOT));
                 if (material == null) {
                     plugin.getLogger().warning("Invalid material " + matName + " for consumable: " + consumableName);
                     continue;
                 }
-                materials.add(material);
+
+                int seconds = cooldownSection.getInt(matName);
+                if (seconds <= 0) {
+                    plugin.getLogger().warning("Invalid cooldown " + matName + " for consumable: " + consumableName);
+                    continue;
+                }
+
+                materials.add(new MaterialCooldown(material, seconds));
             }
-            consumableMaterials.put(consumable, materials);
-            consumableCooldowns.put(consumable, seconds);
+            consumablesMap.put(consumable, materials);
         }
     }
 
@@ -71,25 +77,39 @@ public class CooldownsListener implements Listener {
         if (section == null) {
             return;
         }
-        for (String entityName : section.getKeys(false)) {
-            int seconds = section.getInt(entityName+".cooldown");
-            if (seconds <= 0) {
-                plugin.getLogger().warning("Invalid cooldown for projectile: " + entityName);
+
+        for (String projectileName : section.getKeys(false)) {
+            EntityType projectile;
+            try {
+                projectile = EntityType.valueOf(projectileName.toUpperCase(Locale.ROOT));
+            } catch (IllegalArgumentException e) {
+                plugin.getLogger().warning("Invalid entity type for projectile: " + projectileName);
                 continue;
             }
-            EntityType entityType = EntityType.valueOf(entityName.toUpperCase(Locale.ROOT));
-            List<String> matNames = section.getStringList(entityName+".materials");
-            List<Material> materials = new ArrayList<>();
-            for (String matName : matNames) {
+
+            ConfigurationSection cooldownSection = section.getConfigurationSection(projectileName);
+            if (cooldownSection == null) {
+                plugin.getLogger().warning("Invalid configuration for consumable: " + projectileName);
+                continue;
+            }
+
+            List<MaterialCooldown> materials = new ArrayList<>();
+            for (String matName : cooldownSection.getKeys(false)) {
                 Material material = Material.getMaterial(matName.toUpperCase(Locale.ROOT));
                 if (material == null) {
-                    plugin.getLogger().warning("Invalid material " + matName + " for projectile: " + entityName);
+                    plugin.getLogger().warning("Invalid material " + matName + " for projectile: " + projectileName);
                     continue;
                 }
-                materials.add(material);
+
+                int seconds = cooldownSection.getInt(matName);
+                if (seconds <= 0) {
+                    plugin.getLogger().warning("Invalid cooldown " + matName + " for consumable: " + projectileName);
+                    continue;
+                }
+
+                materials.add(new MaterialCooldown(material, seconds));
             }
-            projectileMaterials.put(entityType, materials);
-            projectileCooldowns.put(entityType, seconds);
+            projectilesMap.put(projectile, materials);
         }
     }
 
@@ -117,11 +137,12 @@ public class CooldownsListener implements Listener {
     public void onItemConsumed(PlayerItemConsumeEvent event) {
         Player player = event.getPlayer();
         Material consumable = event.getItem().getType();
-        if (!consumableCooldowns.containsKey(consumable)) {
+        if (!consumablesMap.containsKey(consumable)) {
             return;
         }
-        int cooldown = consumableCooldowns.get(consumable) * 20;
-        for (Material material : consumableMaterials.get(consumable)) {
+        for (MaterialCooldown materialCooldown : consumablesMap.get(consumable)) {
+            Material material = materialCooldown.getMaterial();
+            int cooldown = materialCooldown.getCooldown() * 20;
             player.setCooldown(material, 1);
             Bukkit.getScheduler().runTaskLater(plugin, () -> player.setCooldown(material, cooldown - 1), 1);
         }
@@ -133,11 +154,12 @@ public class CooldownsListener implements Listener {
         if (!(projectile.getShooter() instanceof Player player)) {
             return;
         }
-        if (!projectileMaterials.containsKey(projectile.getType())) {
+        if (!projectilesMap.containsKey(projectile.getType())) {
             return;
         }
-        int cooldown = projectileCooldowns.get(projectile.getType()) * 20;
-        for (Material material : projectileMaterials.get(projectile.getType())) {
+        for (MaterialCooldown materialCooldown : projectilesMap.get(projectile.getType())) {
+            Material material = materialCooldown.getMaterial();
+            int cooldown = materialCooldown.getCooldown() * 20;
             player.setCooldown(material, 1);
             Bukkit.getScheduler().runTaskLater(plugin, () -> player.setCooldown(material, cooldown - 1), 1);
         }
