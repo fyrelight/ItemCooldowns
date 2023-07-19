@@ -10,9 +10,11 @@ import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
 import org.bukkit.event.entity.ProjectileLaunchEvent;
+import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
+import org.bukkit.inventory.ItemStack;
 import uk.fyrelight.itemcooldowns.ItemCooldownsPlugin;
 import uk.fyrelight.itemcooldowns.objects.MaterialCooldown;
 import uk.fyrelight.itemcooldowns.objects.Messages;
@@ -117,13 +119,33 @@ public class CooldownsListener implements Listener {
     }
 
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
+        Player player = event.getPlayer();
+        Material material = player.getInventory().getItem(event.getHand()).getType();
+        int cooldown = player.getCooldown(material);
+        if (cooldown > 0) {
+            Messages.COOLDOWN.sendActionBar(player, cooldown / 20);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    public void onPlayerInteractAtEntity(PlayerInteractEntityEvent event) {
+        if (event.getRightClicked().getType() != EntityType.ARMOR_STAND) return;
+        Player player = event.getPlayer();
+        Material material = player.getInventory().getItem(event.getHand()).getType();
+        int cooldown = player.getCooldown(material);
+        if (cooldown > 0) {
+            Messages.COOLDOWN.sendActionBar(player, cooldown / 20);
+        }
+    }
+
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.getHand() != EquipmentSlot.HAND) return;
         if (event.getItem() == null) return;
         Player player = event.getPlayer();
         Material material = event.getItem().getType();
         int cooldown = player.getCooldown(material);
-        if (cooldown > 0 && (!event.hasBlock() || event.useItemInHand() == PlayerInteractEvent.Result.DENY)) {
+        if (cooldown > 0 && (!(event.useItemInHand() == PlayerInteractEvent.Result.ALLOW))) {
             Messages.COOLDOWN.sendActionBar(player, cooldown / 20);
         }
     }
