@@ -16,20 +16,24 @@ public class ItemCooldownsPlugin extends JavaPlugin {
     private final File messagesFile = new File(getDataFolder(), "messages.yml");
     private YamlConfiguration messages;
 
+    public void reloadMessages() {
+        messages = YamlConfiguration.loadConfiguration(messagesFile);
+        InputStream defaultMessages = getResource("messages.yml");
+        if (defaultMessages != null) {
+            messages.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defaultMessages, Charsets.UTF_8)));
+        }
+    }
+
     public YamlConfiguration getMessages() {
         if (messages == null) {
-            // Equivalent to reloadConfig()
-            messages = YamlConfiguration.loadConfiguration(messagesFile);
-            InputStream defaultMessages = getResource("messages.yml");
-            if (defaultMessages != null) {
-                messages.setDefaults(YamlConfiguration.loadConfiguration(new InputStreamReader(defaultMessages, Charsets.UTF_8)));
-            }
+            reloadMessages();
         }
         return messages;
     }
 
     public boolean reloadPlugin() {
         reloadConfig();
+        reloadMessages();
         CooldownsListener.reload();
         return true;
     }
