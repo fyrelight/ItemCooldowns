@@ -1,0 +1,9 @@
+prefix: '<gold>[<yellow>ItemCooldowns<gold>]'
+cooldown: '<red>You can use this again in <white>%s<red> seconds.'
+command:
+  default: '<gold>ItemCooldowns <yellow>by Lexicon'
+  no_permission: '<red>You do not have permission to use this command.'
+  invalid_subcommand: '<red>Invalid subcommand.'
+  reload:
+    successful: '<green>ItemCooldowns reloaded successfully.'
+    failure: '<red>ItemCooldowns failed to reload.'

@@ -1,7 +1,5 @@
 package uk.fyrelight.itemcooldowns.listeners;
 
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.format.NamedTextColor;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
 import org.bukkit.configuration.ConfigurationSection;
@@ -17,22 +15,23 @@ import org.bukkit.event.player.PlayerItemConsumeEvent;
 import org.bukkit.inventory.EquipmentSlot;
 import uk.fyrelight.itemcooldowns.ItemCooldownsPlugin;
 import uk.fyrelight.itemcooldowns.objects.MaterialCooldown;
+import uk.fyrelight.itemcooldowns.objects.Messages;
 
 import java.util.*;
 
 public class CooldownsListener implements Listener {
-    private final ItemCooldownsPlugin plugin;
-    private final Map<Material, List<MaterialCooldown>> consumablesMap = new HashMap<>();
-    private final Map<EntityType, List<MaterialCooldown>> projectilesMap = new HashMap<>();
+    private static final Map<Material, List<MaterialCooldown>> consumablesMap = new HashMap<>();
+    private static final Map<EntityType, List<MaterialCooldown>> projectilesMap = new HashMap<>();
 
-    public void reloadListener() {
+    public static void reload() {
         consumablesMap.clear();
         projectilesMap.clear();
         registerConsumables();
         registerProjectiles();
     }
 
-    public void registerConsumables() {
+    public static void registerConsumables() {
+        ItemCooldownsPlugin plugin = ItemCooldownsPlugin.getInstance();
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("consumables");
         if (section == null) {
             plugin.getLogger().warning("Invalid configuration for consumables.");
@@ -72,7 +71,8 @@ public class CooldownsListener implements Listener {
         }
     }
 
-    public void registerProjectiles() {
+    public static void registerProjectiles() {
+        ItemCooldownsPlugin plugin = ItemCooldownsPlugin.getInstance();
         ConfigurationSection section = plugin.getConfig().getConfigurationSection("projectiles");
         if (section == null) {
             return;
@@ -113,10 +113,7 @@ public class CooldownsListener implements Listener {
         }
     }
 
-    public CooldownsListener(ItemCooldownsPlugin plugin) {
-        this.plugin = plugin;
-        registerConsumables();
-        registerProjectiles();
+    public CooldownsListener() {
     }
 
     @EventHandler(priority = EventPriority.MONITOR)
@@ -127,9 +124,7 @@ public class CooldownsListener implements Listener {
         Material material = event.getItem().getType();
         int cooldown = player.getCooldown(material);
         if (cooldown > 0 && (!event.hasBlock() || event.useItemInHand() == PlayerInteractEvent.Result.DENY)) {
-            player.sendActionBar(Component.text("You can use this again in ").color(NamedTextColor.RED)
-                    .append(Component.text((int)(cooldown / 20.0)).color(NamedTextColor.YELLOW))
-                    .append(Component.text(" seconds.").color(NamedTextColor.RED)));
+            Messages.COOLDOWN.sendActionBar(player, cooldown / 20);
         }
     }
 
@@ -143,8 +138,10 @@ public class CooldownsListener implements Listener {
         for (MaterialCooldown materialCooldown : consumablesMap.get(consumable)) {
             Material material = materialCooldown.getMaterial();
             int cooldown = materialCooldown.getCooldown() * 20;
-            player.setCooldown(material, 1);
-            Bukkit.getScheduler().runTaskLater(plugin, () -> player.setCooldown(material, cooldown - 1), 1);
+            // Set cooldown to prevent the player spamming - Full amount so the message is correct
+            player.setCooldown(material, cooldown);
+            // Set it a tick later to prevent Vanilla overriding it
+            Bukkit.getScheduler().runTaskLater(ItemCooldownsPlugin.getInstance(), () -> player.setCooldown(material, cooldown - 1), 1);
         }
     }
 
@@ -160,8 +157,10 @@ public class CooldownsListener implements Listener {
         for (MaterialCooldown materialCooldown : projectilesMap.get(projectile.getType())) {
             Material material = materialCooldown.getMaterial();
             int cooldown = materialCooldown.getCooldown() * 20;
-            player.setCooldown(material, 1);
-            Bukkit.getScheduler().runTaskLater(plugin, () -> player.setCooldown(material, cooldown - 1), 1);
+            // Set cooldown to prevent the player spamming - Full amount so the message is correct
+            player.setCooldown(material, cooldown);
+            // Set it a tick later to prevent Vanilla overriding it
+            Bukkit.getScheduler().runTaskLater(ItemCooldownsPlugin.getInstance(), () -> player.setCooldown(material, cooldown - 1), 1);
         }
     }
 }
