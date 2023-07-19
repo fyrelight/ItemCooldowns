@@ -6,7 +6,6 @@ import net.kyori.adventure.text.minimessage.MiniMessage;
 import uk.fyrelight.itemcooldowns.ItemCooldownsPlugin;
 
 public enum Messages {
-    PREFIX("prefix", "<gold>[<yellow>ItemCooldowns<gold>]"),
     COOLDOWN("cooldown", "<red>You can use this again in <white>%s<red> seconds."),
     COMMAND_DEFAULT("command.default", "<gold>ItemCooldowns <yellow>by Lexicon"),
     COMMAND_NO_PERMISSION("command.no_permission", "<red>You do not have permission to use this command."),
@@ -30,6 +29,15 @@ public enum Messages {
     private Component getMessage(Object[] replacements) {
         String messageString = getFormattedString(replacements);
         return MiniMessage.miniMessage().deserialize(messageString);
+    }
+
+    private Component getPrefix() {
+        String unformattedString = ItemCooldownsPlugin.getInstance().getMessages().getString("prefix", "<gold>[<yellow>ItemCooldowns<gold>] ");
+        return MiniMessage.miniMessage().deserialize(unformattedString);
+    }
+
+    public void sendPrefixedMessage(Audience audience, Object... replacements) {
+        audience.sendMessage(getPrefix().append(getMessage(replacements)));
     }
 
     public void sendMessage(Audience audience, Object... replacements) {

@@ -20,7 +20,7 @@ public class ItemCooldownsCommand implements TabExecutor {
 
     private boolean checkPermission(CommandSender sender, String permission) {
         if (!sender.hasPermission(permission)) {
-            Messages.COMMAND_NO_PERMISSION.sendMessage(sender);
+            Messages.COMMAND_NO_PERMISSION.sendPrefixedMessage(sender);
             return false;
         }
         return true;
@@ -47,7 +47,7 @@ public class ItemCooldownsCommand implements TabExecutor {
             return true;
         }
         if (args == null || args.length == 0) {
-            Messages.COMMAND_DEFAULT.sendMessage(sender);
+            Messages.COMMAND_DEFAULT.sendPrefixedMessage(sender);
             return true;
         }
         if (args[0].equalsIgnoreCase("reload")) {
@@ -55,13 +55,13 @@ public class ItemCooldownsCommand implements TabExecutor {
                 return true;
             }
             if (plugin.reloadPlugin()) {
-                Messages.COMMAND_RELOAD_SUCCESS.sendMessage(sender);
+                Messages.COMMAND_RELOAD_SUCCESS.sendPrefixedMessage(sender);
             } else {
-                Messages.COMMAND_RELOAD_FAILURE.sendMessage(sender);
+                Messages.COMMAND_RELOAD_FAILURE.sendPrefixedMessage(sender);
             }
             return true;
         }
-        Messages.COMMAND_INVALID_SUBCOMMAND.sendMessage(sender);
+        Messages.COMMAND_INVALID_SUBCOMMAND.sendPrefixedMessage(sender);
         return true;
     }
 

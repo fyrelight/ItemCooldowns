@@ -1,4 +1,4 @@
-prefix: '<gold>[<yellow>ItemCooldowns<gold>]'
+prefix: '<gold>[<yellow>ItemCooldowns<gold>] '
 cooldown: '<red>You can use this again in <white>%s<red> seconds.'
 command:
   default: '<gold>ItemCooldowns <yellow>by Lexicon'
