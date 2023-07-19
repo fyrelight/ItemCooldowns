@@ -139,13 +139,14 @@ public class CooldownsListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
+    @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteract(PlayerInteractEvent event) {
+        if (event.useItemInHand() == PlayerInteractEvent.Result.ALLOW) return;
         if (event.getItem() == null) return;
         Player player = event.getPlayer();
         Material material = event.getItem().getType();
         int cooldown = player.getCooldown(material);
-        if (cooldown > 0 && (event.useItemInHand() != PlayerInteractEvent.Result.ALLOW)) {
+        if (cooldown > 0) {
             Messages.COOLDOWN.sendActionBar(player, cooldown / 20);
         }
     }
