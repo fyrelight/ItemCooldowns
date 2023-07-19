@@ -145,7 +145,7 @@ public class CooldownsListener implements Listener {
         Player player = event.getPlayer();
         Material material = event.getItem().getType();
         int cooldown = player.getCooldown(material);
-        if (cooldown > 0 && (!(event.useItemInHand() == PlayerInteractEvent.Result.ALLOW))) {
+        if (cooldown > 0 && (event.useItemInHand() != PlayerInteractEvent.Result.ALLOW)) {
             Messages.COOLDOWN.sendActionBar(player, cooldown / 20);
         }
     }
