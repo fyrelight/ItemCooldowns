@@ -11,10 +11,10 @@ commands:
 permissions:
     itemcooldowns.command:
         description: Allows the user to use the /itemcooldowns command
-        default: false
+        default: op
     itemcooldowns.command.reload:
         description: Allows the user to reload the plugin
-        default: false
+        default: op
         children:
             itemcooldowns.command: true
 
