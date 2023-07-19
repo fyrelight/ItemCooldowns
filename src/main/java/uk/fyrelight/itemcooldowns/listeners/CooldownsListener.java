@@ -114,9 +114,6 @@ public class CooldownsListener implements Listener {
         }
     }
 
-    public CooldownsListener() {
-    }
-
     @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInteractEntity(PlayerInteractEntityEvent event) {
         Player player = event.getPlayer();
@@ -142,6 +139,8 @@ public class CooldownsListener implements Listener {
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.useItemInHand() == Event.Result.ALLOW) return;
         if (event.getItem() == null) return;
+        // This is not foolproof - Spigot marks many blocks as interactable when they are not
+        if (event.getClickedBlock() != null && event.getClickedBlock().getType().isInteractable()) return;
         Player player = event.getPlayer();
         Material material = event.getItem().getType();
         int cooldown = player.getCooldown(material);
