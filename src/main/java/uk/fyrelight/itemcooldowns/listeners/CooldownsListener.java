@@ -41,7 +41,7 @@ public class CooldownsListener implements Listener {
             return;
         }
         for (String consumableName : section.getKeys(false)) {
-            int seconds = section.getInt(consumableName);
+            int seconds = section.getInt(consumableName+".cooldown");
             if (seconds <= 0) {
                 plugin.getLogger().warning("Invalid cooldown for consumable: " + consumableName);
                 continue;
