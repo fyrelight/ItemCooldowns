@@ -6,6 +6,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.Player;
 import org.bukkit.entity.Projectile;
+import org.bukkit.event.Event;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.EventPriority;
 import org.bukkit.event.Listener;
@@ -13,8 +14,6 @@ import org.bukkit.event.entity.ProjectileLaunchEvent;
 import org.bukkit.event.player.PlayerInteractEntityEvent;
 import org.bukkit.event.player.PlayerInteractEvent;
 import org.bukkit.event.player.PlayerItemConsumeEvent;
-import org.bukkit.inventory.EquipmentSlot;
-import org.bukkit.inventory.ItemStack;
 import uk.fyrelight.itemcooldowns.ItemCooldownsPlugin;
 import uk.fyrelight.itemcooldowns.objects.MaterialCooldown;
 import uk.fyrelight.itemcooldowns.objects.Messages;
@@ -141,7 +140,7 @@ public class CooldownsListener implements Listener {
 
     @EventHandler(priority = EventPriority.MONITOR)
     public void onPlayerInteract(PlayerInteractEvent event) {
-        if (event.useItemInHand() == PlayerInteractEvent.Result.ALLOW) return;
+        if (event.useItemInHand() == Event.Result.ALLOW) return;
         if (event.getItem() == null) return;
         Player player = event.getPlayer();
         Material material = event.getItem().getType();
