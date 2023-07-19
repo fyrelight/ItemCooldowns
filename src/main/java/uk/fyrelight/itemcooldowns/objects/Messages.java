@@ -28,6 +28,7 @@ public enum Messages {
 
     private Component getMessage(Object[] replacements) {
         String messageString = getFormattedString(replacements);
+        if (messageString.isEmpty()) return null;
         return MiniMessage.miniMessage().deserialize(messageString);
     }
 
@@ -37,14 +38,20 @@ public enum Messages {
     }
 
     public void sendPrefixedMessage(Audience audience, Object... replacements) {
-        audience.sendMessage(getPrefix().append(getMessage(replacements)));
+        Component messageToSend = getMessage(replacements);
+        if (messageToSend == null) return;
+        audience.sendMessage(getPrefix().append(messageToSend));
     }
 
     public void sendMessage(Audience audience, Object... replacements) {
-        audience.sendMessage(getMessage(replacements));
+        Component messageToSend = getMessage(replacements);
+        if (messageToSend == null) return;
+        audience.sendMessage(messageToSend);
     }
 
     public void sendActionBar(Audience audience, Object... replacements) {
-        audience.sendActionBar(getMessage(replacements));
+        Component messageToSend = getMessage(replacements);
+        if (messageToSend == null) return;
+        audience.sendActionBar(messageToSend);
     }
 }

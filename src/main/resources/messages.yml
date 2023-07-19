@@ -1,3 +1,4 @@
+# Set any message to '' to disable it.
 prefix: '<gold>[<yellow>ItemCooldowns<gold>] '
 cooldown: '<red>You can use this again in <white>%s<red> seconds.'
 command:
