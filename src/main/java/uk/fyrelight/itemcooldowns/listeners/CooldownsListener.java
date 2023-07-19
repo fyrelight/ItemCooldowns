@@ -116,7 +116,7 @@ public class CooldownsListener implements Listener {
     public CooldownsListener() {
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onPlayerInteract(PlayerInteractEvent event) {
         if (event.getHand() != EquipmentSlot.HAND) return;
         if (event.getItem() == null) return;
@@ -128,7 +128,7 @@ public class CooldownsListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onItemConsumed(PlayerItemConsumeEvent event) {
         Player player = event.getPlayer();
         Material consumable = event.getItem().getType();
@@ -145,7 +145,7 @@ public class CooldownsListener implements Listener {
         }
     }
 
-    @EventHandler(priority = EventPriority.MONITOR)
+    @EventHandler(priority = EventPriority.MONITOR, ignoreCancelled = true)
     public void onProjectileLaunched(ProjectileLaunchEvent event) {
         Projectile projectile = event.getEntity();
         if (!(projectile.getShooter() instanceof Player player)) {
